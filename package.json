@@ -6,7 +6,7 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test \"test/*.test.mjs\"",
+    "test": "node --test",
     "serve": "node scripts/serve.mjs"
   },
   "dependencies": {
