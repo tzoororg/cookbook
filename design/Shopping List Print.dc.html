@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+doc-page:not(:defined){visibility:hidden;}
+body{margin:0;font-family:'Karla',sans-serif;color:#33261C;}
+a{color:#C4491D;text-decoration:none;} a:hover{color:#9A3512;}
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+</style>
+</helmet>
+<doc-page margin="0.9in">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2.5px solid #33261C;padding-bottom:14px;">
+    <div>
+      <div style="font-family:'Crimson Pro',serif;font-size:30px;font-weight:700;">Shopping list</div>
+      <div style="font-size:13px;color:#8A7454;margin-top:4px;">My Cookbook · week of Aug 10, 2026</div>
+    </div>
+    <div style="font-size:13px;color:#8A7454;text-align:right;">3 recipes<br>Chana Masala · Khao Soi · Pad Kra Pao</div>
+  </div>
+  <div style="column-count:2;column-gap:44px;margin-top:26px;">
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+      <div style="break-inside:avoid;margin-bottom:26px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#B07A1E;border-bottom:1px solid #E8DCC8;padding-bottom:5px;margin-bottom:8px;">{{ g.name }}</div>
+        <div style="display:flex;flex-direction:column;">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+            <div style="display:flex;gap:10px;align-items:baseline;padding:5px 0;font-size:14.5px;">
+              <span style="flex-shrink:0;width:13px;height:13px;border:1.5px solid #B3A48D;border-radius:3px;position:relative;top:2px;"></span>
+              <span style="flex:1;">{{ it.text }}</span>
+              <span style="font-size:11.5px;color:#B3A48D;font-style:italic;">{{ it.from }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</doc-page>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { groups: [
+      {name:'Produce', items:[
+        {text:'3 yellow onions', from:'Chana · Khao Soi'},
+        {text:'Thai basil, 1 bunch', from:'Pad Kra Pao'},
+        {text:'Ginger, 1 large knob', from:'all three'},
+        {text:'Garlic, 2 heads', from:'all three'},
+        {text:'Limes ×4', from:'Khao Soi'},
+        {text:'Cilantro, 1 bunch', from:'Chana Masala'},
+        {text:'Bird\u2019s eye chilies', from:'Pad Kra Pao'},
+        {text:'Shallots ×3', from:'Khao Soi'}]},
+      {name:'Pantry', items:[
+        {text:'Coconut milk ×2 cans', from:'Khao Soi'},
+        {text:'Chickpeas ×2 cans', from:'Chana Masala'},
+        {text:'Fish sauce', from:'Khao Soi · Kra Pao'},
+        {text:'Oyster sauce', from:'Pad Kra Pao'},
+        {text:'Jasmine rice, 1 kg', from:'Kra Pao'},
+        {text:'Egg noodles, 400 g fresh', from:'Khao Soi'},
+        {text:'Palm sugar', from:'Khao Soi'},
+        {text:'Khao soi curry paste', from:'Khao Soi'},
+        {text:'Garam masala', from:'Chana Masala'},
+        {text:'Crushed tomatoes, 1 can', from:'Chana Masala'}]},
+      {name:'Protein', items:[
+        {text:'2 chicken legs', from:'Khao Soi'},
+        {text:'500 g ground pork', from:'Pad Kra Pao'}]},
+      {name:'Extras', items:[
+        {text:'Pickled mustard greens', from:'Khao Soi'},
+        {text:'Eggs ×4 (for frying)', from:'Pad Kra Pao'}]},
+    ]};
+  }
+}
+</script>
+</body>
+</html>

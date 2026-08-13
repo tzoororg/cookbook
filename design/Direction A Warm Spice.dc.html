@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FAF4EA;color:#33261C;font-family:'Karla',sans-serif;}
+a{color:#C4491D;text-decoration:none;} a:hover{color:#9A3512;text-decoration:underline;}
+</style>
+</helmet>
+<div style="min-height:100vh;">
+  <header style="border-bottom:1px solid #E8DCC8;background:#FAF4EA;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:72px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:'Crimson Pro',serif;font-size:26px;font-weight:700;letter-spacing:-0.01em;">My Cookbook<span style="color:#C4491D;">.</span></div>
+      <nav style="display:flex;gap:28px;align-items:center;font-size:15px;font-weight:500;">
+        <a href="#" style="color:#33261C;border-bottom:2px solid #C4491D;padding:24px 0 22px;">Browse</a>
+        <a href="#" style="color:#7A6A58;">Wishlist</a>
+        <a href="#" style="color:#7A6A58;">Meal Plan</a>
+        <a href="#" style="color:#7A6A58;">Settings</a>
+      </nav>
+    </div>
+  </header>
+  <main style="max-width:1200px;margin:0 auto;padding:36px 32px 80px;">
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:20px;">
+      <input placeholder="Search recipes or ingredients…" style="flex:1;min-width:280px;padding:12px 16px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;font-family:'Karla',sans-serif;font-size:15px;color:#33261C;outline:none;">
+      <div style="display:flex;gap:0;border:1.5px solid #DECFB6;border-radius:10px;overflow:hidden;background:#FFFDF8;">
+        <button style="padding:11px 18px;border:none;background:#33261C;color:#FAF4EA;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">All</button>
+        <button style="padding:11px 18px;border:none;background:transparent;color:#7A6A58;font-family:'Karla',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Wishlist</button>
+        <button style="padding:11px 18px;border:none;background:transparent;color:#7A6A58;font-family:'Karla',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Tried</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;">
+      <span style="padding:6px 14px;border-radius:999px;background:#C4491D;color:#FFF8EE;font-size:13px;font-weight:700;">indian</span>
+      <span style="padding:6px 14px;border-radius:999px;background:#F1E4CE;color:#7A5A38;font-size:13px;font-weight:500;">thai</span>
+      <span style="padding:6px 14px;border-radius:999px;background:#F1E4CE;color:#7A5A38;font-size:13px;font-weight:500;">weeknight</span>
+      <span style="padding:6px 14px;border-radius:999px;background:#F1E4CE;color:#7A5A38;font-size:13px;font-weight:500;">curry</span>
+      <span style="padding:6px 14px;border-radius:999px;background:#F1E4CE;color:#7A5A38;font-size:13px;font-weight:500;">dessert</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;">
+      <sc-for list="{{ recipes }}" as="r" hint-placeholder-count="6">
+        <article style="background:#FFFDF8;border:1px solid #EADDC6;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(80,50,20,0.05);" style-hover="box-shadow:0 6px 18px rgba(80,50,20,0.12);transform:translateY(-2px);">
+          <div style="aspect-ratio:4/3;background:{{ r.photoBg }};display:flex;align-items:center;justify-content:center;">
+            <span style="font-family:'Crimson Pro',serif;font-size:44px;font-style:italic;color:rgba(255,253,248,0.9);">{{ r.initial }}</span>
+          </div>
+          <div style="padding:18px 20px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+              <h3 style="margin:0;font-family:'Crimson Pro',serif;font-size:22px;font-weight:600;line-height:1.2;">{{ r.title }}</h3>
+              <sc-if value="{{ r.tried }}" hint-placeholder-val="{{ true }}">
+                <span style="flex-shrink:0;font-size:12px;font-weight:700;color:#3E7A4C;background:#E4F0E3;padding:3px 10px;border-radius:999px;white-space:nowrap;">✓ ×{{ r.cooked }}</span>
+              </sc-if>
+              <sc-if value="{{ r.wishlist }}">
+                <span style="flex-shrink:0;font-size:12px;font-weight:700;color:#B07A1E;background:#F7EBCF;padding:3px 10px;border-radius:999px;white-space:nowrap;">To try</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+              <sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="2">
+                <span style="font-size:12px;color:#8A7454;background:#F4EAD6;padding:3px 9px;border-radius:6px;">{{ t }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const recipes = [
+      {title:'Chana Masala', initial:'Ch', photoBg:'linear-gradient(135deg,#C4491D,#8F2F0E)', tags:['indian','weeknight'], tried:true, wishlist:false, cooked:7},
+      {title:'Khao Soi', initial:'Kh', photoBg:'linear-gradient(135deg,#D9902A,#A8641A)', tags:['thai','curry'], tried:true, wishlist:false, cooked:3},
+      {title:'Palak Paneer', initial:'Pa', photoBg:'linear-gradient(135deg,#5E7C42,#3F5A2C)', tags:['indian'], tried:false, wishlist:true, cooked:0},
+      {title:'Pad Kra Pao', initial:'PK', photoBg:'linear-gradient(135deg,#8C4A2F,#5F2F1B)', tags:['thai','weeknight'], tried:true, wishlist:false, cooked:12},
+      {title:'Gulab Jamun', initial:'GJ', photoBg:'linear-gradient(135deg,#B0713A,#7E4A21)', tags:['indian','dessert'], tried:false, wishlist:true, cooked:0},
+      {title:'Tom Kha Gai', initial:'TK', photoBg:'linear-gradient(135deg,#C9A24E,#96742E)', tags:['thai','soup'], tried:true, wishlist:false, cooked:2},
+    ];
+    return { recipes };
+  }
+}
+</script>
+</body>
+</html>

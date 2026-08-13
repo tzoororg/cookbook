@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FAF4EA;color:#33261C;font-family:'Karla',sans-serif;}
+a{color:#C4491D;text-decoration:none;} a:hover{color:#9A3512;text-decoration:underline;}
+input::placeholder,textarea::placeholder{color:#B3A48D;}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;">
+  <sc-if value="{{ readOnly }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#F1E4CE;color:#7A5A38;font-size:13px;font-weight:500;text-align:center;padding:8px 16px;">Read-only mode — browsing without a GitHub token. <a href="#" onClick="{{ openSettings }}" style="font-weight:700;">Add one in Settings</a> to save changes.</div>
+  </sc-if>
+  <header style="border-bottom:1px solid #E8DCC8;background:#FAF4EA;position:sticky;top:0;z-index:20;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:68px;display:flex;align-items:center;justify-content:space-between;">
+      <div onClick="{{ goBrowse }}" style="font-family:'Crimson Pro',serif;font-size:26px;font-weight:700;letter-spacing:-0.01em;cursor:pointer;">My Cookbook<span style="color:#C4491D;">.</span></div>
+      <nav style="display:flex;gap:26px;align-items:center;font-size:15px;font-weight:500;">
+        <a href="#" onClick="{{ goBrowse }}" style="color:{{ navBrowseColor }};border-bottom:2px solid {{ navBrowseLine }};padding:22px 0 20px;">Browse</a>
+        <a href="#" onClick="{{ goWishlist }}" style="color:{{ navWishColor }};border-bottom:2px solid {{ navWishLine }};padding:22px 0 20px;">Wishlist</a>
+        <a href="#" onClick="{{ goPlan }}" style="color:{{ navPlanColor }};border-bottom:2px solid {{ navPlanLine }};padding:22px 0 20px;">Meal Plan</a>
+        <a href="#" onClick="{{ openSettings }}" style="color:#7A6A58;">Settings</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- BROWSE / WISHLIST -->
+  <sc-if value="{{ showGrid }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1200px;width:100%;margin:0 auto;padding:36px 32px 80px;box-sizing:border-box;flex:1;">
+    <sc-if value="{{ isWishlistView }}">
+      <div style="margin-bottom:26px;">
+        <h1 style="margin:0;font-family:'Crimson Pro',serif;font-size:36px;font-weight:600;">The to-try queue</h1>
+        <p style="margin:6px 0 0;color:#8A7454;font-size:15px;">{{ wishCount }} recipes waiting for a free evening.</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isBrowseView }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:18px;">
+        <input value="{{ query }}" onChange="{{ setQuery }}" placeholder="Search recipes or ingredients…" style="flex:1;min-width:280px;padding:12px 16px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;font-family:'Karla',sans-serif;font-size:15px;color:#33261C;outline:none;" style-focus="border-color:#C4491D;">
+        <div style="display:flex;border:1.5px solid #DECFB6;border-radius:10px;overflow:hidden;background:#FFFDF8;">
+          <sc-for list="{{ statusFilters }}" as="f" hint-placeholder-count="3">
+            <button onClick="{{ f.onClick }}" style="padding:11px 18px;border:none;background:{{ f.bg }};color:{{ f.color }};font-family:'Karla',sans-serif;font-size:14px;font-weight:{{ f.weight }};cursor:pointer;">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;">
+        <sc-for list="{{ tagChips }}" as="c" hint-placeholder-count="5">
+          <button onClick="{{ c.onClick }}" style="padding:6px 14px;border:none;border-radius:999px;background:{{ c.bg }};color:{{ c.color }};font-family:'Karla',sans-serif;font-size:13px;font-weight:{{ c.weight }};cursor:pointer;">{{ c.label }}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ noResults }}">
+      <div style="text-align:center;padding:90px 20px;">
+        <div style="font-family:'Crimson Pro',serif;font-style:italic;font-size:28px;color:#8A7454;">Nothing on the menu.</div>
+        <p style="color:#B3A48D;font-size:15px;margin:10px 0 0;">No recipes match — try clearing the search or filters.</p>
+        <button onClick="{{ clearFilters }}" style="margin-top:18px;padding:10px 22px;border:1.5px solid #C4491D;border-radius:10px;background:transparent;color:#C4491D;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;" style-hover="background:#C4491D;color:#FFF8EE;">Clear filters</button>
+      </div>
+    </sc-if>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;">
+      <sc-for list="{{ visibleRecipes }}" as="r" hint-placeholder-count="6">
+        <article onClick="{{ r.open }}" style="background:#FFFDF8;border:1px solid #EADDC6;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(80,50,20,0.05);transition:box-shadow .15s,transform .15s;" style-hover="box-shadow:0 6px 18px rgba(80,50,20,0.12);transform:translateY(-2px);">
+          <div style="aspect-ratio:4/3;background:{{ r.photoBg }};display:flex;align-items:center;justify-content:center;">
+            <span style="font-family:'Crimson Pro',serif;font-size:44px;font-style:italic;color:rgba(255,253,248,0.9);">{{ r.initial }}</span>
+          </div>
+          <div style="padding:18px 20px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+              <h3 style="margin:0;font-family:'Crimson Pro',serif;font-size:22px;font-weight:600;line-height:1.2;">{{ r.title }}</h3>
+              <sc-if value="{{ r.tried }}" hint-placeholder-val="{{ true }}">
+                <span style="flex-shrink:0;font-size:12px;font-weight:700;color:#3E7A4C;background:#E4F0E3;padding:3px 10px;border-radius:999px;white-space:nowrap;">✓ ×{{ r.cooked }}</span>
+              </sc-if>
+              <sc-if value="{{ r.wishlist }}">
+                <span style="flex-shrink:0;font-size:12px;font-weight:700;color:#B07A1E;background:#F7EBCF;padding:3px 10px;border-radius:999px;white-space:nowrap;">To try</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+              <sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="2">
+                <span style="font-size:12px;color:#8A7454;background:#F4EAD6;padding:3px 9px;border-radius:6px;">{{ t }}</span>
+              </sc-for>
+            </div>
+            <sc-if value="{{ r.showMadeIt }}">
+              <button onClick="{{ r.madeIt }}" style="margin-top:14px;width:100%;padding:10px;border:1.5px solid #C4491D;border-radius:10px;background:transparent;color:#C4491D;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;" style-hover="background:#C4491D;color:#FFF8EE;">I made it!</button>
+            </sc-if>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- RECIPE PAGE -->
+  <sc-if value="{{ isRecipeView }}">
+  <main style="max-width:{{ recipeMaxWidth }};width:100%;margin:0 auto;padding:36px 32px 80px;box-sizing:border-box;flex:1;">
+    <a href="#" onClick="{{ goBrowse }}" style="font-size:14px;font-weight:700;color:#8A7454;">← All recipes</a>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-top:14px;flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0;font-family:'Crimson Pro',serif;font-size:{{ titleSize }};font-weight:700;line-height:1.1;">Khao Soi</h1>
+        <div style="display:flex;gap:14px;align-items:center;margin-top:12px;flex-wrap:wrap;">
+          <span style="font-size:12px;color:#8A7454;background:#F4EAD6;padding:4px 10px;border-radius:6px;">thai</span>
+          <span style="font-size:12px;color:#8A7454;background:#F4EAD6;padding:4px 10px;border-radius:6px;">curry</span>
+          <span style="font-size:14px;color:#7A6A58;">Serves 4</span>
+          <a href="#" style="font-size:14px;">hot-thai-kitchen.com ↗</a>
+          <span style="font-size:12px;font-weight:700;color:#3E7A4C;background:#E4F0E3;padding:3px 10px;border-radius:999px;">✓ Cooked ×3</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button onClick="{{ addToPlan }}" style="padding:11px 18px;border:none;border-radius:10px;background:#C4491D;color:#FFF8EE;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;" style-hover="background:#9A3512;">+ Meal plan</button>
+        <button onClick="{{ openLogForm }}" style="padding:11px 18px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;color:#33261C;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;" style-hover="border-color:#C4491D;color:#C4491D;">Log a cook</button>
+        <button onClick="{{ toggleCooking }}" style="padding:11px 18px;border:1.5px solid {{ cookingBorder }};border-radius:10px;background:{{ cookingBg }};color:{{ cookingColor }};font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">{{ cookingLabel }}</button>
+        <sc-if value="{{ saveState }}">
+          <span style="font-size:13px;font-weight:700;color:{{ saveColor }};">{{ saveState }}</span>
+        </sc-if>
+      </div>
+    </div>
+    <sc-if value="{{ notCooking }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:26px;">
+        <div style="aspect-ratio:16/9;border-radius:14px;background:linear-gradient(135deg,#D9902A,#A8641A);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Crimson Pro',serif;font-style:italic;font-size:52px;color:rgba(255,253,248,0.9);">Kh</span></div>
+        <div style="aspect-ratio:auto;border-radius:14px;background:#F1E4CE;display:flex;align-items:center;justify-content:center;color:#B3A48D;font-size:14px;">+ Add photo</div>
+      </div>
+    </sc-if>
+    <div style="display:grid;grid-template-columns:{{ recipeCols }};gap:48px;margin-top:36px;align-items:start;">
+      <aside>
+        <h2 style="font-family:'Crimson Pro',serif;font-size:24px;font-weight:600;margin:0 0 14px;">Ingredients</h2>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <sc-for list="{{ ingredients }}" as="ing" hint-placeholder-count="8">
+            <label style="display:flex;gap:12px;align-items:baseline;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:{{ ingSize }};color:{{ ing.color }};text-decoration:{{ ing.deco }};" style-hover="background:#F4EAD6;">
+              <input type="checkbox" checked="{{ ing.checked }}" onChange="{{ ing.toggle }}" style="accent-color:#C4491D;width:16px;height:16px;flex-shrink:0;position:relative;top:2px;">
+              <span>{{ ing.text }}</span>
+            </label>
+          </sc-for>
+        </div>
+      </aside>
+      <section>
+        <h2 style="font-family:'Crimson Pro',serif;font-size:24px;font-weight:600;margin:0 0 18px;">Method</h2>
+        <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:{{ stepGap }};">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+            <li style="display:flex;gap:18px;">
+              <span style="flex-shrink:0;width:38px;height:38px;border-radius:999px;background:#F1E4CE;color:#C4491D;font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center;">{{ s.n }}</span>
+              <div style="flex:1;">
+                <p style="margin:4px 0 0;font-size:{{ stepSize }};line-height:1.55;">{{ s.text }}</p>
+                <sc-if value="{{ s.hasTimer }}">
+                  <button onClick="{{ s.timerClick }}" style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border:1.5px solid {{ s.timerBorder }};border-radius:999px;background:{{ s.timerBg }};color:{{ s.timerColor }};font-family:'Karla',sans-serif;font-size:{{ timerSize }};font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;">⏱ {{ s.timerLabel }}</button>
+                </sc-if>
+              </div>
+            </li>
+          </sc-for>
+        </ol>
+        <sc-if value="{{ notCooking }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:48px;border-top:1px solid #E8DCC8;padding-top:28px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="font-family:'Crimson Pro',serif;font-size:24px;font-weight:600;margin:0;">Cook log</h2>
+            <button onClick="{{ openLogForm }}" style="padding:8px 16px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;color:#33261C;font-family:'Karla',sans-serif;font-size:13px;font-weight:700;cursor:pointer;" style-hover="border-color:#C4491D;color:#C4491D;">+ New entry</button>
+          </div>
+          <sc-if value="{{ logFormOpen }}">
+            <div style="margin-top:16px;background:#FFFDF8;border:1.5px solid #DECFB6;border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+              <input type="date" value="{{ logDate }}" onChange="{{ setLogDate }}" style="padding:10px 12px;border:1.5px solid #DECFB6;border-radius:8px;background:#FAF4EA;font-family:'Karla',sans-serif;font-size:14px;color:#33261C;">
+              <input value="{{ logNote }}" onChange="{{ setLogNote }}" placeholder="How did it go? e.g. used less sugar, great" style="flex:1;min-width:220px;padding:10px 12px;border:1.5px solid #DECFB6;border-radius:8px;background:#FAF4EA;font-family:'Karla',sans-serif;font-size:14px;color:#33261C;outline:none;">
+              <button onClick="{{ saveLog }}" style="padding:10px 18px;border:none;border-radius:8px;background:#C4491D;color:#FFF8EE;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Save</button>
+              <button onClick="{{ closeLogForm }}" style="padding:10px 12px;border:none;background:transparent;color:#8A7454;font-family:'Karla',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Cancel</button>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;">
+            <sc-for list="{{ cookLog }}" as="e" hint-placeholder-count="3">
+              <div style="display:flex;gap:18px;padding:14px 4px;border-bottom:1px solid #F1E4CE;">
+                <span style="flex-shrink:0;width:96px;font-size:13px;font-weight:700;color:#8A7454;">{{ e.date }}</span>
+                <div style="flex:1;">
+                  <p style="margin:0;font-size:15px;line-height:1.5;">{{ e.note }}</p>
+                  <sc-if value="{{ e.hasPhotos }}">
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                      <sc-for list="{{ e.photos }}" as="ph" hint-placeholder-count="2">
+                        <div title="{{ ph.caption }}" style="width:72px;height:72px;border-radius:10px;background:{{ ph.bg }};cursor:pointer;display:flex;align-items:flex-end;justify-content:flex-end;padding:5px;box-sizing:border-box;" style-hover="box-shadow:0 3px 10px rgba(80,50,20,0.25);">
+                          <span style="font-size:10px;color:rgba(255,253,248,0.85);font-style:italic;font-family:'Crimson Pro',serif;">{{ ph.caption }}</span>
+                        </div>
+                      </sc-for>
+                      <div style="width:72px;height:72px;border-radius:10px;border:1.5px dashed #DECFB6;color:#B3A48D;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:#C4491D;color:#C4491D;">+</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+      </section>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- MEAL PLAN -->
+  <sc-if value="{{ isPlanView }}">
+  <main style="max-width:1200px;width:100%;margin:0 auto;padding:36px 32px 80px;box-sizing:border-box;flex:1;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1 style="margin:0;font-family:'Crimson Pro',serif;font-size:36px;font-weight:600;">This week's plan</h1>
+        <p style="margin:6px 0 0;color:#8A7454;font-size:15px;">{{ planCount }} recipes · shopping list builds itself.</p>
+      </div>
+      <a href="Shopping List Print.dc.html" style="padding:10px 18px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;color:#33261C;font-size:14px;font-weight:700;text-decoration:none;" style-hover="border-color:#C4491D;color:#C4491D;text-decoration:none;">🖨 Print list</a>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:40px;align-items:start;">
+      <section>
+        <h2 style="font-family:'Crimson Pro',serif;font-size:22px;font-weight:600;margin:0 0 14px;">Recipes</h2>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ plan }}" as="p" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;background:#FFFDF8;border:1px solid #EADDC6;border-radius:12px;padding:12px 14px;">
+              <div style="width:52px;height:52px;border-radius:10px;background:{{ p.photoBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-family:'Crimson Pro',serif;font-style:italic;font-size:18px;color:rgba(255,253,248,0.9);">{{ p.initial }}</span></div>
+              <div style="flex:1;">
+                <div style="font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;">{{ p.title }}</div>
+                <div style="font-size:13px;color:#8A7454;">Serves {{ p.serves }}</div>
+              </div>
+              <button onClick="{{ p.remove }}" title="Remove" style="border:none;background:transparent;color:#B3A48D;font-size:18px;cursor:pointer;padding:6px;" style-hover="color:#C4491D;">✕</button>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ planEmpty }}">
+          <div style="text-align:center;padding:40px 20px;border:1.5px dashed #DECFB6;border-radius:12px;color:#8A7454;font-size:15px;">Nothing planned yet. Add recipes from their pages.</div>
+        </sc-if>
+      </section>
+      <section style="background:#FFFDF8;border:1px solid #EADDC6;border-radius:14px;padding:24px 28px;">
+        <h2 style="font-family:'Crimson Pro',serif;font-size:22px;font-weight:600;margin:0 0 4px;">Shopping list</h2>
+        <p style="margin:0 0 18px;font-size:13px;color:#8A7454;">Merged across {{ planCount }} recipes</p>
+        <sc-for list="{{ shopGroups }}" as="g" hint-placeholder-count="3">
+          <div style="margin-bottom:18px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B07A1E;margin-bottom:6px;">{{ g.name }}</div>
+            <div style="display:flex;flex-direction:column;">
+              <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+                <label style="display:flex;gap:11px;align-items:baseline;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:15px;color:{{ it.color }};text-decoration:{{ it.deco }};" style-hover="background:#F4EAD6;">
+                  <input type="checkbox" checked="{{ it.checked }}" onChange="{{ it.toggle }}" style="accent-color:#C4491D;width:15px;height:15px;flex-shrink:0;position:relative;top:2px;">
+                  <span style="flex:1;">{{ it.text }}</span>
+                  <span style="font-size:12px;color:#B3A48D;">{{ it.from }}</span>
+                </label>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </section>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- SETTINGS MODAL -->
+  <sc-if value="{{ settingsOpen }}">
+    <div onClick="{{ closeSettings }}" style="position:fixed;inset:0;background:rgba(51,38,28,0.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;">
+      <div onClick="{{ stop }}" style="background:#FAF4EA;border-radius:16px;max-width:460px;width:100%;padding:32px;box-shadow:0 20px 60px rgba(51,38,28,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <h2 style="margin:0;font-family:'Crimson Pro',serif;font-size:26px;font-weight:600;">Settings</h2>
+          <button onClick="{{ closeSettings }}" style="border:none;background:transparent;color:#8A7454;font-size:20px;cursor:pointer;padding:4px;">✕</button>
+        </div>
+        <p style="margin:0 0 22px;font-size:14px;color:#8A7454;line-height:1.5;">Recipes live in a GitHub repo. Add a personal access token to save changes; without one the site is read-only.</p>
+        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;">GitHub token</label>
+        <input type="password" placeholder="ghp_…" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;font-family:'Karla',sans-serif;font-size:15px;color:#33261C;outline:none;margin-bottom:16px;" style-focus="border-color:#C4491D;">
+        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;">Repository</label>
+        <input placeholder="username/my-cookbook" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid #DECFB6;border-radius:10px;background:#FFFDF8;font-family:'Karla',sans-serif;font-size:15px;color:#33261C;outline:none;margin-bottom:24px;" style-focus="border-color:#C4491D;">
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button onClick="{{ closeSettings }}" style="padding:11px 18px;border:none;background:transparent;color:#8A7454;font-family:'Karla',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Cancel</button>
+          <button onClick="{{ saveSettings }}" style="padding:11px 22px;border:none;border-radius:10px;background:#C4491D;color:#FFF8EE;font-family:'Karla',sans-serif;font-size:14px;font-weight:700;cursor:pointer;" style-hover="background:#9A3512;">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOASTS -->
+  <sc-if value="{{ toast }}">
+    <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:60;background:{{ toastBg }};color:{{ toastColor }};padding:13px 22px;border-radius:12px;font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(51,38,28,0.25);animation:toastIn .2s ease;">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;readOnly&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;State&quot;}, &quot;simulateError&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;State&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: 'browse', query: '', status: 'All', activeTag: null,
+    cooking: false, checkedIng: {}, checkedShop: {},
+    logFormOpen: false, logDate: new Date().toISOString().slice(0,10), logNote: '',
+    settingsOpen: false, readOnly: true, saveState: '', toast: '', toastKind: 'ok',
+    cookLog: [
+      {date:'Jul 30, 2026', note:'Doubled the curry paste, right call. Egg noodles from the Thai market.', photos:[{bg:'linear-gradient(135deg,#D9902A,#8F5A14)', caption:'the bowl'},{bg:'linear-gradient(135deg,#8C4A2F,#54291A)', caption:'crispy noodles'}]},
+      {date:'May 12, 2026', note:'Used less sugar, great. Pickled mustard greens are essential.', photos:[{bg:'linear-gradient(135deg,#C9A24E,#8A6A28)', caption:'table shot'}]},
+      {date:'Mar 3, 2026', note:'First try — broth a bit thin, reduce longer next time.', photos:[]},
+    ],
+    timers: {},
+    plan: ['Chana Masala','Khao Soi','Pad Kra Pao'],
+  };
+  recipes = [
+    {id:1, title:'Chana Masala', initial:'Ch', photoBg:'linear-gradient(135deg,#C4491D,#8F2F0E)', tags:['indian','weeknight'], tried:true, cooked:7, serves:4},
+    {id:2, title:'Khao Soi', initial:'Kh', photoBg:'linear-gradient(135deg,#D9902A,#A8641A)', tags:['thai','curry'], tried:true, cooked:3, serves:4},
+    {id:3, title:'Palak Paneer', initial:'Pa', photoBg:'linear-gradient(135deg,#5E7C42,#3F5A2C)', tags:['indian'], tried:false, cooked:0, serves:4},
+    {id:4, title:'Pad Kra Pao', initial:'PK', photoBg:'linear-gradient(135deg,#8C4A2F,#5F2F1B)', tags:['thai','weeknight'], tried:true, cooked:12, serves:2},
+    {id:5, title:'Gulab Jamun', initial:'GJ', photoBg:'linear-gradient(135deg,#B0713A,#7E4A21)', tags:['indian','dessert'], tried:false, cooked:0, serves:8},
+    {id:6, title:'Tom Kha Gai', initial:'TK', photoBg:'linear-gradient(135deg,#C9A24E,#96742E)', tags:['thai','soup'], tried:true, cooked:2, serves:4},
+    {id:7, title:'Massaman Curry', initial:'MC', photoBg:'linear-gradient(135deg,#7E5A3A,#54391F)', tags:['thai','curry'], tried:false, cooked:0, serves:6},
+    {id:8, title:'Aloo Gobi', initial:'AG', photoBg:'linear-gradient(135deg,#C9A227,#96751A)', tags:['indian','weeknight'], tried:true, cooked:5, serves:4},
+    {id:9, title:'Mango Sticky Rice', initial:'MS', photoBg:'linear-gradient(135deg,#D9A83A,#A87B1E)', tags:['thai','dessert'], tried:false, cooked:0, serves:4},
+  ];
+  ingredientsData = ['2 tbsp coconut oil','4 tbsp khao soi curry paste','400 ml coconut milk','500 ml chicken stock','2 chicken legs','400 g fresh egg noodles','2 tbsp fish sauce','1 tbsp palm sugar','Pickled mustard greens','Shallots, lime, chili oil to serve'];
+  stepTimers = {0:3*60, 2:40*60, 3:null, 4:null, 5:null, 1:null}; // seconds, keyed by step index
+  stepsData = [
+    'Warm the coconut oil in a heavy pot over medium heat. Fry the curry paste for 2–3 minutes until fragrant and the oil separates.',
+    'Add half the coconut milk and simmer, stirring, until thickened and glossy.',
+    'Add the chicken, stock, and remaining coconut milk. Simmer gently for 35–40 minutes until the chicken is tender.',
+    'Season with fish sauce and palm sugar. Taste — it should be rich, salty, faintly sweet.',
+    'Boil the noodles; fry a handful crisp in oil for topping.',
+    'Serve noodles in bowls, ladle over curry and chicken, top with crispy noodles, shallots, pickled greens, lime, and chili oil.',
+  ];
+  shopData = [
+    {name:'Produce', items:[['3 onions','Chana · Khao Soi'],['Thai basil, 1 bunch','Pad Kra Pao'],['Ginger + garlic','all three'],['Limes ×4','Khao Soi']]},
+    {name:'Pantry', items:[['Coconut milk ×2 cans','Khao Soi'],['Chickpeas ×2 cans','Chana Masala'],['Fish sauce','Khao Soi · Kra Pao'],['Jasmine rice','Kra Pao']]},
+    {name:'Protein', items:[['2 chicken legs','Khao Soi'],['500 g ground pork','Pad Kra Pao']]},
+  ];
+  nav(view) { this.setState({view}); }
+  timerClick(i, dur) {
+    const t = this.state.timers[i];
+    if (t && t.remaining === 0) { this.setTimer(i, undefined); return; }
+    if (t && t.running) { this.setTimer(i, {...t, running:false}); return; }
+    this.setTimer(i, t ? {...t, running:true} : {remaining:dur, running:true});
+    if (!this._tick) this._tick = setInterval(() => {
+      let any = false;
+      const timers = {};
+      for (const [k,v] of Object.entries(this.state.timers)) {
+        if (v && v.running && v.remaining > 0) { timers[k] = {...v, remaining:v.remaining-1}; any = true; }
+        else timers[k] = v;
+      }
+      this.setState({timers});
+      if (!any) { clearInterval(this._tick); this._tick = null; }
+    }, 1000);
+  }
+  setTimer(i, val) { this.setState(st => { const timers = {...st.timers}; if (val === undefined) delete timers[i]; else timers[i] = val; return {timers}; }); }
+  componentWillUnmount() { if (this._tick) clearInterval(this._tick); }
+  flashSave(then) {
+    this.setState({saveState:'Saving…'});
+    setTimeout(() => {
+      this.setState({saveState:'Saved ✓'});
+      setTimeout(() => this.setState({saveState:''}), 1800);
+      if (then) then();
+    }, 700);
+  }
+  showToast(msg, kind='ok') {
+    this.setState({toast:msg, toastKind:kind});
+    clearTimeout(this._tt);
+    this._tt = setTimeout(() => this.setState({toast:''}), 2600);
+  }
+  renderVals() {
+    const s = this.state;
+    const isBrowse = s.view === 'browse', isWish = s.view === 'wishlist';
+    const isRecipe = s.view === 'recipe', isPlan = s.view === 'plan';
+    const q = s.query.toLowerCase();
+    let list = this.recipes.filter(r => {
+      if (isWish) return !r.tried;
+      if (s.status === 'Wishlist' && r.tried) return false;
+      if (s.status === 'Tried' && !r.tried) return false;
+      if (s.activeTag && !r.tags.includes(s.activeTag)) return false;
+      if (q && !r.title.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    const visibleRecipes = list.map(r => ({
+      ...r, wishlist: !r.tried, showMadeIt: isWish,
+      open: (e) => { e.stopPropagation(); this.nav('recipe'); },
+      madeIt: (e) => { e.stopPropagation(); this.flashSave(() => this.showToast(r.title + ' marked as tried ✓')); },
+    }));
+    const statusFilters = ['All','Wishlist','Tried'].map(label => ({
+      label, onClick: () => this.setState({status:label}),
+      bg: s.status===label ? '#33261C' : 'transparent',
+      color: s.status===label ? '#FAF4EA' : '#7A6A58',
+      weight: s.status===label ? 700 : 500,
+    }));
+    const tagChips = ['indian','thai','weeknight','curry','dessert','soup'].map(t => ({
+      label: t, onClick: () => this.setState({activeTag: s.activeTag===t ? null : t}),
+      bg: s.activeTag===t ? '#C4491D' : '#F1E4CE',
+      color: s.activeTag===t ? '#FFF8EE' : '#7A5A38',
+      weight: s.activeTag===t ? 700 : 500,
+    }));
+    const ingredients = this.ingredientsData.map((text,i) => ({
+      text, checked: !!s.checkedIng[i],
+      color: s.checkedIng[i] ? '#B3A48D' : '#33261C',
+      deco: s.checkedIng[i] ? 'line-through' : 'none',
+      toggle: () => this.setState(st => ({checkedIng:{...st.checkedIng,[i]:!st.checkedIng[i]}})),
+    }));
+    const fmt = (sec) => { const m = Math.floor(sec/60), ss = sec%60; return m + ':' + String(ss).padStart(2,'0'); };
+    const steps = this.stepsData.map((text,i) => {
+      const dur = this.stepTimers[i];
+      const t = s.timers[i];
+      const running = t && t.running, doneT = t && t.remaining === 0;
+      return {n:i+1, text, hasTimer: dur != null,
+        timerLabel: doneT ? 'Done — reset' : t ? fmt(t.remaining) + (running ? ' · pause' : ' · resume') : fmt(dur||0) + ' · start',
+        timerBg: doneT ? '#3E7A4C' : running ? '#C4491D' : '#FFFDF8',
+        timerColor: (doneT || running) ? '#FFF8EE' : '#C4491D',
+        timerBorder: doneT ? '#3E7A4C' : '#C4491D',
+        timerClick: () => this.timerClick(i, dur),
+      };
+    });
+    const planRecipes = s.plan.map(title => this.recipes.find(r => r.title===title)).filter(Boolean).map(r => ({
+      ...r, remove: () => { this.setState(st => ({plan: st.plan.filter(t => t!==r.title)})); this.showToast(r.title+' removed from plan'); },
+    }));
+    const shopGroups = this.shopData.map((g,gi) => ({
+      name: g.name,
+      items: g.items.map(([text,from],ii) => {
+        const k = gi+'-'+ii;
+        return {text, from, checked: !!s.checkedShop[k],
+          color: s.checkedShop[k] ? '#B3A48D' : '#33261C',
+          deco: s.checkedShop[k] ? 'line-through' : 'none',
+          toggle: () => this.setState(st => ({checkedShop:{...st.checkedShop,[k]:!st.checkedShop[k]}}))};
+      }),
+    }));
+    const cooking = s.cooking;
+    const navC = (active) => active ? '#33261C' : '#7A6A58';
+    const navL = (active) => active ? '#C4491D' : 'transparent';
+    return {
+      readOnly: (this.props.readOnly ?? true) && s.readOnly,
+      showGrid: isBrowse || isWish, isBrowseView: isBrowse, isWishlistView: isWish,
+      isRecipeView: isRecipe, isPlanView: isPlan,
+      navBrowseColor: navC(isBrowse||isRecipe), navBrowseLine: navL(isBrowse||isRecipe),
+      navWishColor: navC(isWish), navWishLine: navL(isWish),
+      navPlanColor: navC(isPlan), navPlanLine: navL(isPlan),
+      goBrowse: (e) => {e&&e.preventDefault&&e.preventDefault(); this.nav('browse');},
+      goWishlist: (e) => {e&&e.preventDefault&&e.preventDefault(); this.nav('wishlist');},
+      goPlan: (e) => {e&&e.preventDefault&&e.preventDefault(); this.nav('plan');},
+      openSettings: (e) => {e&&e.preventDefault&&e.preventDefault(); this.setState({settingsOpen:true});},
+      closeSettings: () => this.setState({settingsOpen:false}),
+      saveSettings: () => { this.setState({settingsOpen:false, readOnly:false}); this.showToast('Settings saved ✓'); },
+      stop: (e) => e.stopPropagation(),
+      settingsOpen: s.settingsOpen,
+      query: s.query, setQuery: (e) => this.setState({query:e.target.value}),
+      statusFilters, tagChips, visibleRecipes,
+      noResults: (isBrowse||isWish) && visibleRecipes.length===0,
+      clearFilters: () => this.setState({query:'', status:'All', activeTag:null}),
+      wishCount: this.recipes.filter(r=>!r.tried).length,
+      ingredients, steps,
+      cookLog: s.cookLog.map(e => ({...e, photos: e.photos || [], hasPhotos: (e.photos || []).length > 0})),
+      timerSize: cooking ? '17px' : '13px',
+      cooking, notCooking: !cooking,
+      cookingLabel: cooking ? '✕ Exit cooking mode' : '🍳 Cooking mode',
+      cookingBorder: cooking ? '#C4491D' : '#DECFB6',
+      cookingBg: cooking ? '#C4491D' : '#FFFDF8',
+      cookingColor: cooking ? '#FFF8EE' : '#33261C',
+      toggleCooking: () => this.setState({cooking:!cooking}),
+      titleSize: cooking ? '56px' : '42px',
+      ingSize: cooking ? '20px' : '15px',
+      stepSize: cooking ? '24px' : '16px',
+      stepGap: cooking ? '34px' : '22px',
+      recipeCols: cooking ? '1fr 2.2fr' : '1fr 1.8fr',
+      recipeMaxWidth: cooking ? '1400px' : '1100px',
+      logFormOpen: s.logFormOpen,
+      openLogForm: () => this.setState({logFormOpen:true}),
+      closeLogForm: () => this.setState({logFormOpen:false}),
+      logDate: s.logDate, setLogDate: (e) => this.setState({logDate:e.target.value}),
+      logNote: s.logNote, setLogNote: (e) => this.setState({logNote:e.target.value}),
+      saveLog: () => {
+        if (this.props.simulateError ?? false) { this.showToast('Couldn\u2019t save — check your connection', 'err'); return; }
+        const d = new Date(s.logDate+'T12:00');
+        const date = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        this.flashSave(() => {
+          this.setState(st => ({cookLog:[{date, note: st.logNote || '(no notes)'}, ...st.cookLog], logFormOpen:false, logNote:''}));
+          this.showToast('Cook logged ✓');
+        });
+      },
+      addToPlan: () => this.flashSave(() => this.showToast('Added to meal plan ✓')),
+      saveState: s.saveState, saveColor: s.saveState==='Saved ✓' ? '#3E7A4C' : '#8A7454',
+      plan: planRecipes, planCount: planRecipes.length, planEmpty: planRecipes.length===0,
+      shopGroups,
+      toast: s.toast,
+      toastBg: s.toastKind==='err' ? '#8F2F0E' : '#33261C',
+      toastColor: '#FFF8EE',
+    };
+  }
+}
+</script>
+</body>
+</html>

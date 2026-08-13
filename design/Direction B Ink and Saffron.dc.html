@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F2EB;color:#1E1B16;font-family:'Public Sans',sans-serif;}
+a{color:#B8860B;text-decoration:none;} a:hover{color:#8A6508;text-decoration:underline;}
+</style>
+</helmet>
+<div style="min-height:100vh;">
+  <header style="background:#1E1B16;color:#F5F2EB;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:76px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:'Libre Caslon Text',serif;font-size:22px;letter-spacing:0.02em;">MY COOKBOOK</div>
+      <nav style="display:flex;gap:32px;align-items:center;font-size:14px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">
+        <a href="#" style="color:#E9B44C;">Browse</a>
+        <a href="#" style="color:#A39B8B;">Wishlist</a>
+        <a href="#" style="color:#A39B8B;">Meal Plan</a>
+        <a href="#" style="color:#A39B8B;">Settings</a>
+      </nav>
+    </div>
+  </header>
+  <main style="max-width:1200px;margin:0 auto;padding:40px 32px 80px;">
+    <h1 style="font-family:'Libre Caslon Text',serif;font-size:40px;font-weight:400;margin:0 0 28px;">All recipes <span style="color:#8B8272;font-size:20px;font-family:'Public Sans',sans-serif;">· 24</span></h1>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px;">
+      <input placeholder="Search recipes or ingredients…" style="flex:1;min-width:280px;padding:13px 16px;border:none;border-bottom:2px solid #1E1B16;background:transparent;font-family:'Public Sans',sans-serif;font-size:16px;color:#1E1B16;outline:none;">
+      <div style="display:flex;gap:8px;">
+        <button style="padding:10px 20px;border:1.5px solid #1E1B16;border-radius:0;background:#1E1B16;color:#F5F2EB;font-family:'Public Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;">All</button>
+        <button style="padding:10px 20px;border:1.5px solid #C9C0AE;border-radius:0;background:transparent;color:#6B6354;font-family:'Public Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;">Wishlist</button>
+        <button style="padding:10px 20px;border:1.5px solid #C9C0AE;border-radius:0;background:transparent;color:#6B6354;font-family:'Public Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;">Tried</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px;">
+      <span style="padding:5px 12px;background:#E9B44C;color:#1E1B16;font-size:12px;font-weight:700;letter-spacing:0.03em;">INDIAN</span>
+      <span style="padding:5px 12px;background:#E7E1D3;color:#6B6354;font-size:12px;font-weight:600;letter-spacing:0.03em;">THAI</span>
+      <span style="padding:5px 12px;background:#E7E1D3;color:#6B6354;font-size:12px;font-weight:600;letter-spacing:0.03em;">WEEKNIGHT</span>
+      <span style="padding:5px 12px;background:#E7E1D3;color:#6B6354;font-size:12px;font-weight:600;letter-spacing:0.03em;">CURRY</span>
+      <span style="padding:5px 12px;background:#E7E1D3;color:#6B6354;font-size:12px;font-weight:600;letter-spacing:0.03em;">DESSERT</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#C9C0AE;border:2px solid #1E1B16;">
+      <sc-for list="{{ recipes }}" as="r" hint-placeholder-count="6">
+        <article style="background:#F5F2EB;padding:0;cursor:pointer;" style-hover="background:#FFFCF4;">
+          <div style="aspect-ratio:3/2;background:{{ r.photoBg }};display:flex;align-items:flex-end;padding:14px;box-sizing:border-box;">
+            <span style="font-family:'Libre Caslon Text',serif;font-style:italic;font-size:15px;color:rgba(245,242,235,0.85);">{{ r.tagline }}</span>
+          </div>
+          <div style="padding:16px 18px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+              <h3 style="margin:0;font-family:'Libre Caslon Text',serif;font-size:20px;font-weight:400;line-height:1.25;">{{ r.title }}</h3>
+              <sc-if value="{{ r.tried }}" hint-placeholder-val="{{ true }}">
+                <span style="flex-shrink:0;font-size:12px;font-weight:700;color:#2F5E3A;white-space:nowrap;">✓ ×{{ r.cooked }}</span>
+              </sc-if>
+              <sc-if value="{{ r.wishlist }}">
+                <span style="flex-shrink:0;font-size:12px;font-weight:700;color:#B8860B;white-space:nowrap;">TO TRY</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+              <sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="2">
+                <span style="font-size:12px;color:#8B8272;letter-spacing:0.03em;text-transform:uppercase;">{{ t }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const recipes = [
+      {title:'Chana Masala', tagline:'a weeknight anchor', photoBg:'linear-gradient(160deg,#3E3830,#211D17)', tags:['indian','weeknight'], tried:true, wishlist:false, cooked:7},
+      {title:'Khao Soi', tagline:'northern Thai comfort', photoBg:'linear-gradient(160deg,#B8860B,#7A5806)', tags:['thai','curry'], tried:true, wishlist:false, cooked:3},
+      {title:'Palak Paneer', tagline:'still on the list', photoBg:'linear-gradient(160deg,#4A5A3A,#2E3A22)', tags:['indian'], tried:false, wishlist:true, cooked:0},
+      {title:'Pad Kra Pao', tagline:'fifteen minutes flat', photoBg:'linear-gradient(160deg,#6E4A2E,#462D1A)', tags:['thai','weeknight'], tried:true, wishlist:false, cooked:12},
+      {title:'Gulab Jamun', tagline:'for special occasions', photoBg:'linear-gradient(160deg,#8A6A3A,#5C4322)', tags:['indian','dessert'], tried:false, wishlist:true, cooked:0},
+      {title:'Tom Kha Gai', tagline:'bright and soothing', photoBg:'linear-gradient(160deg,#A08A4E,#6E5C2E)', tags:['thai','soup'], tried:true, wishlist:false, cooked:2},
+    ];
+    return { recipes };
+  }
+}
+</script>
+</body>
+</html>
