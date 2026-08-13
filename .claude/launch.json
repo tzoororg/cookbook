@@ -4,8 +4,8 @@
     {
       "name": "cookbook",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["scripts/serve.mjs", "8123", "/cookbook/"],
-      "port": 8123
+      "runtimeArgs": ["scripts/serve.mjs", "8080"],
+      "port": 8080
     }
   ]
 }
