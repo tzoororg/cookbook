@@ -116,8 +116,16 @@ Work is not done when it builds. It is done when it is live on
 1. `node scripts/build.mjs` and `npm test` — both green.
 2. Commit, then **push to `main`**. The push is what deploys; `.github/workflows/deploy.yml`
    builds and publishes `dist/` to Pages.
-3. Watch the run to completion: `gh run watch $(gh run list -L1 --json databaseId -q '.[0].databaseId')`.
-   A red run means the site is still on the old build — fix and re-push, don't report success.
+3. Watch the run **for your own commit** to completion:
+
+   ```bash
+   gh run watch --exit-status $(gh run list -c $(git rev-parse HEAD) -L1 --json databaseId -q '.[0].databaseId')
+   ```
+
+   Select by commit, not `-L1` — right after a push the run may not be registered yet and
+   `-L1` hands you the *previous* run, which is already green and tells you nothing.
+   If the select returns empty, wait a few seconds and retry. A red run means the site is
+   still on the old build — fix and re-push, don't report success.
 4. Verify what is actually served, don't trust the green check:
    `curl -s https://tzoororg.github.io/cookbook/index.json | grep <something-new-this-push>`.
    Pages can lag the run by a minute; retry before concluding it failed.
