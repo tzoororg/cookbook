@@ -132,6 +132,9 @@ Work is not done when it builds. It is done when it is live on
    No stamp if the deploy did not verify. Silence is the failure state, a stamp is a claim
    that someone can open the URL right now and see the change.
 
+   `PushNotification` answers "not sent" when phone push is off or when you are clearly at the
+   terminal already. That is not a failure — print the same two lines in the reply instead.
+
 ## Don'ts
 
 - Don't edit `dist/` — it is build output.
