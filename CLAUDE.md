@@ -121,19 +121,18 @@ Work is not done when it builds. It is done when it is live on
 4. Verify what is actually served, don't trust the green check:
    `curl -s https://tzoororg.github.io/cookbook/index.json | grep <something-new-this-push>`.
    Pages can lag the run by a minute; retry before concluding it failed.
-5. Only once step 4 passes, post a deploy stamp with `PushNotification` — one line, under
-   200 chars, in this shape:
+5. Only once step 4 passes, print a deploy stamp **in the chat reply**, as a fenced block:
 
    ```
    cookbook @ <short-sha> live on pages
    <n> recipes · Pages <duration> · <what changed>
    ```
 
+   The stamp is chat-only. **Don't call `PushNotification`** — no phone push, no terminal
+   notification.
+
    No stamp if the deploy did not verify. Silence is the failure state, a stamp is a claim
    that someone can open the URL right now and see the change.
-
-   `PushNotification` answers "not sent" when phone push is off or when you are clearly at the
-   terminal already. That is not a failure — print the same two lines in the reply instead.
 
 ## Don'ts
 
