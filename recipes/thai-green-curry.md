@@ -16,7 +16,7 @@ photos: [bowl.jpg]
 - 2 tbsp | vegetable oil
 - 4-6 tbsp | thai green curry paste
 - 250 ml | chicken stock, low sodium
-- 400 g | coconut milk, full fat
+- 400 ml | coconut milk, full fat
 - 1-3 tsp | fish sauce
 - 1-3 tsp | white sugar
 - 1/8 tsp | salt

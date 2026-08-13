@@ -13,7 +13,7 @@ photos: [bowl.jpg]
 
 ### For the dal
 
-- 95 g | masoor dal, red lentils
+- 95 g | masoor dal, red lentils, 1/2 cup
 - 2 tbsp | moong dal, optional
 - 2 | tomatoes, deseeded and chopped
 - 1 | green chili, optional

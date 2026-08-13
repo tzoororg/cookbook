@@ -66,6 +66,16 @@ Required: `title`, `slug`, `status`, `added`, an `## Ingredients` section and a 
 - Put the descriptor after a comma (`chicken thigh, sliced`) — the aggregator matches on the part
   before the comma, so `chicken thigh, sliced` and `chicken thigh` merge.
 
+### Measurements
+
+- **Liquids are always volume** — `ml`, `l`, `tsp`, `tbsp`, `cup`. Never weigh a liquid.
+- **Solids given by weight also get a volume**, as a descriptor after the comma:
+  `- 95 g | red lentils, 1/2 cup`. The quantity stays the weight so the shopping list totals in
+  grams; the aggregator strips everything after the comma, so the volume never breaks merging.
+  Don't put the volume in parentheses before the comma — `rice (1/2 cup)` and `rice (1 cup)` are
+  different names to the aggregator and would split into two shopping-list lines.
+- **Butter is grams only.** No cups, no sticks, no tablespoons, and no volume descriptor.
+
 ## Adding a recipe from a URL
 
 1. Fetch the page and extract title, servings, ingredients and steps.
@@ -75,7 +85,7 @@ Required: `title`, `slug`, `status`, `added`, an `## Ingredients` section and a 
    Do not invent quantities; if the source says "a handful", write `- | basil, a handful`.
 4. Save any photos to `photos/<slug>/` and list the filenames in `photos:`.
 5. Run `node scripts/build.mjs`. Fix everything it reports.
-6. Commit.
+6. Ship it — see [Shipping](#shipping).
 
 ## Generating a recipe from requirements
 
@@ -97,6 +107,30 @@ recipes:
   - slug: chana-masala
 ---
 ```
+
+## Shipping
+
+Work is not done when it builds. It is done when it is live on
+[the site](https://tzoororg.github.io/cookbook/). Every time, without being asked:
+
+1. `node scripts/build.mjs` and `npm test` — both green.
+2. Commit, then **push to `main`**. The push is what deploys; `.github/workflows/deploy.yml`
+   builds and publishes `dist/` to Pages.
+3. Watch the run to completion: `gh run watch $(gh run list -L1 --json databaseId -q '.[0].databaseId')`.
+   A red run means the site is still on the old build — fix and re-push, don't report success.
+4. Verify what is actually served, don't trust the green check:
+   `curl -s https://tzoororg.github.io/cookbook/index.json | grep <something-new-this-push>`.
+   Pages can lag the run by a minute; retry before concluding it failed.
+5. Only once step 4 passes, post a deploy stamp with `PushNotification` — one line, under
+   200 chars, in this shape:
+
+   ```
+   cookbook @ <short-sha> live on pages
+   <n> recipes · Pages <duration> · <what changed>
+   ```
+
+   No stamp if the deploy did not verify. Silence is the failure state, a stamp is a claim
+   that someone can open the URL right now and see the change.
 
 ## Don'ts
 
